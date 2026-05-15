@@ -1,0 +1,15 @@
+# Node and build
+node_modules/
+dist/
+build/
+coverage/
+.vscode/
+.DS_Store
+*.log
+*.zip
+# OS
+Thumbs.db
+ehthumbs.db
+
+# Ignore other projects in this directory
+*/node_modules/

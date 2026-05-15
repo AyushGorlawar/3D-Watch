@@ -1,0 +1,945 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Vespera Atelier | Quartz 40</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Sora:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --text: #f0ece4;
+      --muted: rgba(240, 236, 228, 0.7);
+      --accent: #22e1d6;
+      --line: rgba(240, 236, 228, 0.16);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: "Sora", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    body {
+      overflow-x: hidden;
+    }
+
+    body.is-loading {
+      overflow: hidden;
+    }
+
+    main {
+      opacity: 0;
+      transition: opacity 700ms ease;
+    }
+
+    body.is-ready main {
+      opacity: 1;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 22px 6vw;
+      z-index: 40;
+      mix-blend-mode: difference;
+      font-size: 12px;
+      letter-spacing: 0.45em;
+      text-transform: uppercase;
+    }
+
+    .navbar .brand {
+      font-weight: 500;
+    }
+
+    .navbar .nav-cta {
+      border-bottom: 1px solid var(--accent);
+      padding-bottom: 4px;
+    }
+
+    .hero {
+      position: relative;
+      height: 500vh;
+      background: var(--bg);
+    }
+
+    .hero .sticky {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    #frame-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .overlay-layer {
+      position: absolute;
+      inset: 0;
+      padding: 12vh 8vw 10vh;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    .overlay {
+      position: absolute;
+      opacity: 0;
+      transition: opacity 120ms linear;
+    }
+
+    .overlay-headline {
+      top: 16vh;
+      left: 8vw;
+      max-width: 520px;
+    }
+
+    .overlay-headline h1 {
+      font-family: "Cormorant Garamond", serif;
+      font-size: clamp(36px, 5vw, 68px);
+      margin: 0 0 12px;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+
+    .overlay-headline p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.6;
+      max-width: 420px;
+    }
+
+    .overlay-tagline {
+      top: 46vh;
+      right: 8vw;
+      max-width: 320px;
+      text-align: right;
+    }
+
+    .overlay-tagline .label {
+      display: block;
+      font-size: 11px;
+      letter-spacing: 0.5em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .overlay-tagline h2 {
+      font-family: "Cormorant Garamond", serif;
+      font-size: clamp(24px, 3.6vw, 40px);
+      margin: 0;
+    }
+
+    .overlay-details {
+      inset: 10vh 8vw;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8vw;
+    }
+
+    .detail-col {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      max-width: 280px;
+    }
+
+    .detail-item {
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--muted);
+    }
+
+    .detail-item span {
+      display: block;
+      font-size: 10px;
+      letter-spacing: 0.5em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    .overlay-cta {
+      bottom: 12vh;
+      left: 50%;
+      transform: translateX(-50%);
+      pointer-events: auto;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 26px;
+      font-size: 12px;
+      letter-spacing: 0.5em;
+      text-transform: uppercase;
+      border: 1px solid var(--accent);
+      color: var(--text);
+      background: rgba(10, 10, 10, 0.4);
+      backdrop-filter: blur(10px);
+      transition: transform 250ms ease, background 250ms ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      background: rgba(34, 225, 214, 0.12);
+    }
+
+    .scroll-indicator {
+      position: absolute;
+      bottom: 6vh;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 11px;
+      letter-spacing: 0.5em;
+      text-transform: uppercase;
+      color: var(--muted);
+      transition: opacity 200ms linear;
+    }
+
+    .content {
+      position: relative;
+      z-index: 2;
+      padding: 8vh 8vw 12vh;
+      display: flex;
+      flex-direction: column;
+      gap: 6vh;
+    }
+
+    .content-section {
+      position: relative;
+      padding: 70px 0;
+    }
+
+    .content-section:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: -30px;
+      transform: translateX(-50%);
+      width: 1px;
+      height: 60px;
+      background: var(--line);
+    }
+
+    .section-inner {
+      max-width: 1040px;
+      margin: 0 auto;
+      display: grid;
+      gap: 32px;
+    }
+
+    .section-title {
+      font-family: "Cormorant Garamond", serif;
+      font-size: clamp(28px, 3.2vw, 44px);
+      margin: 0;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .section-label {
+      font-size: 11px;
+      letter-spacing: 0.5em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    .section-copy {
+      color: var(--muted);
+      line-height: 1.7;
+      max-width: 620px;
+    }
+
+    .specs-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 26px;
+    }
+
+    .spec-item {
+      padding: 18px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .spec-item span {
+      display: block;
+      font-size: 10px;
+      letter-spacing: 0.5em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    .spec-item p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    blockquote {
+      margin: 0;
+      font-family: "Cormorant Garamond", serif;
+      font-size: clamp(26px, 3.2vw, 42px);
+      line-height: 1.4;
+      max-width: 720px;
+    }
+
+    .final-cta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(26px);
+      transition: opacity 700ms ease, transform 700ms ease;
+    }
+
+    .reveal.in-view {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    #loader {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      background: var(--bg);
+      z-index: 60;
+    }
+
+    #loader .loader-inner {
+      display: grid;
+      gap: 16px;
+      text-align: center;
+    }
+
+    #loader .loader-label {
+      font-size: 12px;
+      letter-spacing: 0.5em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    #loader .loader-bar {
+      width: min(320px, 70vw);
+      height: 2px;
+      background: rgba(240, 236, 228, 0.2);
+      position: relative;
+      overflow: hidden;
+    }
+
+    #loader .loader-bar span {
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 0%;
+      background: var(--accent);
+      transition: width 150ms linear;
+    }
+
+    #loader .loader-count {
+      font-size: 11px;
+      letter-spacing: 0.45em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .grain-overlay {
+      position: fixed;
+      inset: 0;
+      opacity: 0.035;
+      pointer-events: none;
+      z-index: 30;
+      mix-blend-mode: soft-light;
+    }
+
+    .vignette {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at center, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.35) 60%, rgba(0, 0, 0, 0.85) 100%);
+      pointer-events: none;
+      z-index: 25;
+    }
+
+    @media (max-width: 900px) {
+      .overlay-details {
+        display: none;
+      }
+
+      .overlay-headline {
+        max-width: 80vw;
+      }
+
+      .overlay-tagline {
+        text-align: left;
+        left: 8vw;
+        right: auto;
+        top: 50vh;
+      }
+
+      .specs-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .final-cta {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .reveal,
+      .btn {
+        transition: none;
+      }
+    }
+  </style>
+</head>
+<body class="is-loading">
+  <div id="loader" aria-live="polite">
+    <div class="loader-inner">
+      <div class="loader-label">Loading frames</div>
+      <div class="loader-bar"><span id="loader-bar"></span></div>
+      <div class="loader-count" id="loader-count">0%</div>
+    </div>
+  </div>
+
+  <nav class="navbar">
+    <div class="brand">Vespera Atelier</div>
+    <div class="nav-cta">Quartz 40</div>
+  </nav>
+
+  <main>
+    <section id="hero" class="hero">
+      <div class="sticky">
+        <canvas id="frame-canvas" aria-hidden="true"></canvas>
+        <div class="overlay-layer">
+          <div class="overlay overlay-headline" data-start="0" data-end="0.2">
+            <h1>Quartz 40</h1>
+            <p>Calm surfaces. A precise heart. Every finish designed to earn your glance twice.</p>
+          </div>
+
+          <div class="overlay overlay-tagline" data-start="0.25" data-end="0.45">
+            <span class="label">Deconstruction</span>
+            <h2>Discipline revealed, layer by layer.</h2>
+          </div>
+
+          <div class="overlay overlay-details" data-start="0.7" data-end="0.9">
+            <div class="detail-col">
+              <div class="detail-item">
+                <span>Crystal</span>
+                Domed sapphire with anti-reflective clarity.
+              </div>
+              <div class="detail-item">
+                <span>Dial</span>
+                Matte charcoal sunburst surface, reduced to essentials.
+              </div>
+              <div class="detail-item">
+                <span>Seconds</span>
+                Electric-teal hand assembly with a luminous lollipop tip.
+              </div>
+              <div class="detail-item">
+                <span>Movement</span>
+                Quartz plate with gold micro-engravings.
+              </div>
+            </div>
+            <div class="detail-col">
+              <div class="detail-item">
+                <span>Mid-case</span>
+                Titanium core with integrated lug system.
+              </div>
+              <div class="detail-item">
+                <span>Crown guard</span>
+                Vulcanized rubber ring for tactile resistance.
+              </div>
+              <div class="detail-item">
+                <span>Caseback</span>
+                Screw-down exhibition porthole, sealed for daily wear.
+              </div>
+            </div>
+          </div>
+
+          <div class="overlay overlay-cta" data-start="0.88" data-end="1">
+            <a class="btn" href="#final-cta">Reserve a private viewing</a>
+          </div>
+
+          <div class="scroll-indicator" id="scroll-indicator">Scroll to Explore</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="content">
+      <section class="content-section reveal">
+        <div class="section-inner">
+          <div>
+            <div class="section-label">Heritage</div>
+            <h2 class="section-title">A quiet atelier with loud standards.</h2>
+          </div>
+          <p class="section-copy">Vespera Atelier began with a single bench and a simple thesis: quartz can feel as intentional as any mechanical icon. Each case is hand-finished in small runs, with tolerances tuned for silence on the wrist and a dial that breathes in matte depth.</p>
+        </div>
+      </section>
+
+      <section class="content-section reveal">
+        <div class="section-inner">
+          <div>
+            <div class="section-label">Technical</div>
+            <h2 class="section-title">Specifications for daily precision.</h2>
+          </div>
+          <div class="specs-grid">
+            <div class="spec-item">
+              <span>Case</span>
+              <p>40mm round titanium case with brushed and polished contrasts.</p>
+            </div>
+            <div class="spec-item">
+              <span>Profile</span>
+              <p>11mm slim profile for a close, balanced fit.</p>
+            </div>
+            <div class="spec-item">
+              <span>Bracelet</span>
+              <p>Integrated bracelet with tapered links, engineered for fluid drape.</p>
+            </div>
+            <div class="spec-item">
+              <span>Dial</span>
+              <p>Matte charcoal sunburst dial with sculpted markers.</p>
+            </div>
+            <div class="spec-item">
+              <span>Seconds</span>
+              <p>Electric-teal seconds hand, the only moving accent against the dial.</p>
+            </div>
+            <div class="spec-item">
+              <span>Movement</span>
+              <p>Quartz caliber, gold micro-engraved plate, 5-year service cycle.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="content-section reveal">
+        <div class="section-inner">
+          <div class="section-label">Perspective</div>
+          <blockquote>"Quartz is not a shortcut. It is clarity, timed to the second and finished to the millimeter."</blockquote>
+        </div>
+      </section>
+
+      <section class="content-section reveal" id="final-cta">
+        <div class="section-inner final-cta">
+          <div>
+            <div class="section-label">Allocation</div>
+            <h2 class="section-title">Request your allocation.</h2>
+            <p class="section-copy">Limited to 300 pieces for the inaugural run. Each delivered with hand-signed certificate and travel case.</p>
+          </div>
+          <a class="btn" href="mailto:atelier@vespera.example">Contact the atelier</a>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <svg class="grain-overlay" viewBox="0 0 200 200" preserveAspectRatio="none" aria-hidden="true">
+    <filter id="noiseFilter">
+      <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch" />
+      <feColorMatrix type="saturate" values="0" />
+    </filter>
+    <rect width="100%" height="100%" filter="url(#noiseFilter)" />
+  </svg>
+  <div class="vignette" aria-hidden="true"></div>
+
+  <script>
+    const canvas = document.getElementById("frame-canvas");
+    const ctx = canvas.getContext("2d", { alpha: false });
+    const hero = document.getElementById("hero");
+    const overlays = Array.from(document.querySelectorAll(".overlay"));
+    const scrollIndicator = document.getElementById("scroll-indicator");
+    const loaderBar = document.getElementById("loader-bar");
+    const loaderCount = document.getElementById("loader-count");
+
+    const FRAME_DIR = "./";
+    const EXT = "png";
+    const MAX_INDEX = 5000;
+    const PREFIXES = [
+      "ezgif-frame-",
+      "frame-",
+      "frame_",
+      "frame",
+      "render-",
+      "watch-",
+      "product-",
+      "sequence-",
+      "seq-",
+      "img-",
+      "image-",
+      "shot-",
+      "turntable-",
+      "",
+    ];
+
+    const imageCache = new Map();
+    let frames = [];
+    let currentFrameIndex = -1;
+    let currentProgress = 0;
+    let failedUrls = [];
+    let manualOverride = { enabled: false, prefix: '', padLength: 3, start: 1 };
+
+    function clamp(value, min, max) {
+      return Math.min(Math.max(value, min), max);
+    }
+
+    function pad(num, size) {
+      const str = String(num);
+      return str.padStart(size, "0");
+    }
+
+    function buildSrc(prefix, index, padLength) {
+      return `${FRAME_DIR}${prefix}${pad(index, padLength)}.${EXT}`;
+    }
+
+    // Debug UI helpers
+    function ensureDebugPanel() {
+      if (document.getElementById('debug-panel')) return;
+      const panel = document.createElement('div');
+      panel.id = 'debug-panel';
+      panel.style.position = 'fixed';
+      panel.style.right = '12px';
+      panel.style.bottom = '12px';
+      panel.style.zIndex = 120;
+      panel.style.background = 'rgba(0,0,0,0.6)';
+      panel.style.color = 'var(--text)';
+      panel.style.padding = '10px';
+      panel.style.fontSize = '12px';
+      panel.style.maxWidth = '360px';
+      panel.style.border = '1px solid rgba(255,255,255,0.04)';
+      panel.style.backdropFilter = 'blur(6px)';
+
+      panel.innerHTML = `
+        <div style="font-weight:600;margin-bottom:6px">Debug</div>
+        <div id="debug-info">Detecting pattern…</div>
+        <div style="margin-top:8px">Manual override</div>
+        <div style="display:flex;gap:6px;margin-top:6px">
+          <input id="dbg-prefix" placeholder="prefix" style="flex:1;background:transparent;border:1px solid rgba(255,255,255,0.06);padding:6px;color:var(--text)" />
+          <input id="dbg-pad" placeholder="pad" style="width:54px;background:transparent;border:1px solid rgba(255,255,255,0.06);padding:6px;color:var(--text)" />
+        </div>
+        <div style="display:flex;gap:6px;margin-top:8px;align-items:center">
+          <label style="font-size:11px;color:var(--muted)"><input id="dbg-enable" type="checkbox" /> use manual</label>
+          <button id="dbg-retry" style="margin-left:auto;border:1px solid var(--accent);background:transparent;padding:6px 8px;color:var(--text);">Retry</button>
+        </div>
+      `;
+
+      document.body.appendChild(panel);
+
+      const dbgPrefix = document.getElementById('dbg-prefix');
+      const dbgPad = document.getElementById('dbg-pad');
+      const dbgEnable = document.getElementById('dbg-enable');
+      // Prefill with a sensible default for this project
+      if (dbgPrefix) dbgPrefix.value = manualOverride.prefix || 'ezgif-frame-';
+      if (dbgPad) dbgPad.value = manualOverride.padLength || 3;
+      if (dbgEnable) dbgEnable.checked = !!manualOverride.enabled;
+
+      document.getElementById('dbg-retry').addEventListener('click', () => {
+        const pfx = document.getElementById('dbg-prefix').value.trim();
+        const pad = parseInt(document.getElementById('dbg-pad').value, 10) || 3;
+        const enabled = document.getElementById('dbg-enable').checked;
+        manualOverride = { enabled, prefix: pfx, padLength: pad, start: 1 };
+        // reset caches and retry
+        imageCache.clear();
+        failedUrls = [];
+        document.getElementById('loader').style.display = 'grid';
+        document.getElementById('loader-bar').style.width = '0%';
+        document.getElementById('loader-count').textContent = '0%';
+        init();
+      });
+    }
+
+    function updateDebugInfo(text) {
+      ensureDebugPanel();
+      const info = document.getElementById('debug-info');
+      if (info) info.textContent = text;
+    }
+
+    function loadImage(src) {
+      if (imageCache.has(src)) {
+        return imageCache.get(src);
+      }
+      const promise = new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = (e) => reject(new Error('Image failed: ' + src));
+        img.src = src;
+      });
+      imageCache.set(src, promise);
+      return promise;
+    }
+
+    async function probeImage(src) {
+      try {
+        await loadImage(src);
+        return true;
+      } catch (error) {
+        return false;
+      }
+    }
+
+    async function detectPattern() {
+      if (manualOverride.enabled) {
+        updateDebugInfo(`Manual override: prefix='${manualOverride.prefix}', pad=${manualOverride.padLength}`);
+        return { prefix: manualOverride.prefix, padLength: manualOverride.padLength, start: manualOverride.start };
+      }
+      const padLengths = [2, 3, 4, 5, 6];
+      const starts = [1, 0];
+
+      for (const prefix of PREFIXES) {
+        for (const padLength of padLengths) {
+          for (const start of starts) {
+            const firstSrc = buildSrc(prefix, start, padLength);
+            if (await probeImage(firstSrc)) {
+              const secondSrc = buildSrc(prefix, start + 1, padLength);
+              if (await probeImage(secondSrc)) {
+                updateDebugInfo(`Detected: prefix='${prefix}', pad=${padLength}, start=${start}`);
+                return { prefix, padLength, start };
+              }
+            }
+          }
+        }
+      }
+      throw new Error("Frame pattern not detected. Check filenames or update PREFIXES.");
+    }
+
+    async function detectLastIndex(pattern) {
+      let low = pattern.start;
+      let high = pattern.start;
+      let step = 1;
+
+      while (high <= MAX_INDEX && await probeImage(buildSrc(pattern.prefix, high, pattern.padLength))) {
+        low = high;
+        high = high + step;
+        step *= 2;
+      }
+
+      let left = low;
+      let right = Math.min(high, MAX_INDEX);
+      let last = low;
+
+      while (left <= right) {
+        const mid = Math.floor((left + right) / 2);
+        if (await probeImage(buildSrc(pattern.prefix, mid, pattern.padLength))) {
+          last = mid;
+          left = mid + 1;
+        } else {
+          right = mid - 1;
+        }
+      }
+
+      return last;
+    }
+
+    async function preloadFrames(pattern, count) {
+      const images = new Array(count);
+      let loaded = 0;
+
+      for (let i = 0; i < count; i++) {
+        const index = pattern.start + i;
+        const src = buildSrc(pattern.prefix, index, pattern.padLength);
+        try {
+          const img = await loadImage(src);
+          images[i] = img;
+          loaded += 1;
+        } catch (err) {
+          console.warn('Frame missing or failed to load:', src, err);
+          failedUrls.push(src);
+          // Fallback: reuse previous frame to avoid gaps
+          images[i] = images[i - 1] || images[0] || null;
+        }
+
+        const percent = Math.round(((i + 1) / count) * 100);
+        loaderBar.style.width = `${percent}%`;
+        loaderCount.textContent = `${percent}%`;
+      }
+
+      if (loaded === 0) throw new Error('No frames could be loaded');
+      return images;
+    }
+
+    function resizeCanvas() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.floor(window.innerWidth * dpr);
+      canvas.height = Math.floor(window.innerHeight * dpr);
+      canvas.style.width = `${window.innerWidth}px`;
+      canvas.style.height = `${window.innerHeight}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
+    }
+
+    function drawImageCover(img) {
+      const cw = canvas.width / (window.devicePixelRatio || 1);
+      const ch = canvas.height / (window.devicePixelRatio || 1);
+      ctx.fillStyle = "#0a0a0a";
+      ctx.fillRect(0, 0, cw, ch);
+      if (!img) return; // nothing to draw
+      const scale = Math.max(cw / img.width, ch / img.height);
+      const width = img.width * scale;
+      const height = img.height * scale;
+      const x = (cw - width) / 2;
+      const y = (ch - height) / 2;
+
+      ctx.drawImage(img, x, y, width, height);
+    }
+
+    function updateOverlays(progress) {
+      overlays.forEach((overlay) => {
+        const start = parseFloat(overlay.dataset.start);
+        const end = parseFloat(overlay.dataset.end);
+        overlay.style.opacity = rangeOpacity(progress, start, end, 0.08).toFixed(3);
+      });
+      const indicatorOpacity = 1 - clamp(progress / 0.03, 0, 1);
+      scrollIndicator.style.opacity = indicatorOpacity.toFixed(3);
+    }
+
+    function rangeOpacity(progress, start, end, fade) {
+      if (progress <= start || progress >= end) {
+        return 0;
+      }
+      const span = end - start;
+      const fadeSpan = Math.min(fade, span / 2);
+      const t = (progress - start) / span;
+      const edge = fadeSpan / span;
+
+      if (t < edge) {
+        return t / edge;
+      }
+      if (t > 1 - edge) {
+        return (1 - t) / edge;
+      }
+      return 1;
+    }
+
+    function getScrollProgress() {
+      const heroTop = hero.offsetTop;
+      const heroHeight = hero.offsetHeight;
+      const scrollable = heroHeight - window.innerHeight;
+      if (scrollable <= 0) {
+        return 0;
+      }
+      return clamp((window.scrollY - heroTop) / scrollable, 0, 1);
+    }
+
+    function renderFrame(progress) {
+      const targetIndex = Math.round((1 - progress) * (frames.length - 1));
+      if (targetIndex !== currentFrameIndex) {
+        currentFrameIndex = targetIndex;
+        drawImageCover(frames[targetIndex]);
+      }
+    }
+
+    function initScroll() {
+      let ticking = false;
+
+      function onScroll() {
+        if (!ticking) {
+          ticking = true;
+          requestAnimationFrame(() => {
+            ticking = false;
+            const progress = getScrollProgress();
+            if (Math.abs(progress - currentProgress) > 0.0001) {
+              currentProgress = progress;
+              updateOverlays(progress);
+              renderFrame(progress);
+            }
+          });
+        }
+      }
+
+      window.addEventListener("scroll", onScroll, { passive: true });
+      window.addEventListener("resize", () => {
+        resizeCanvas();
+        renderFrame(currentProgress);
+      }, { passive: true });
+
+      onScroll();
+    }
+
+    function initReveals() {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("in-view");
+          }
+        });
+      }, { threshold: 0.18 });
+
+      document.querySelectorAll(".reveal").forEach((section) => observer.observe(section));
+    }
+
+    async function init() {
+      try {
+        resizeCanvas();
+        ensureDebugPanel();
+        updateDebugInfo('Detecting pattern...');
+        const pattern = await detectPattern();
+        const lastIndex = await detectLastIndex(pattern);
+        const count = lastIndex - pattern.start + 1;
+        updateDebugInfo(`Pattern: ${pattern.prefix || '\\u003cempty\\u003e'} pad=${pattern.padLength} start=${pattern.start} last=${lastIndex} count=${count}`);
+
+        failedUrls = [];
+        document.getElementById('loader-bar').style.width = '0%';
+        document.getElementById('loader-count').textContent = '0%';
+
+        frames = await preloadFrames(pattern, count);
+        // Ensure there are no null gaps: fill with nearest available frame
+        const fallback = frames.find(f => f) || null;
+        if (!fallback) throw new Error('No usable frames after preload');
+        for (let i = 0; i < frames.length; i++) {
+          if (!frames[i]) frames[i] = frames[i - 1] || fallback;
+        }
+        currentFrameIndex = frames.length - 1;
+        drawImageCover(frames[currentFrameIndex]);
+
+        document.body.classList.remove("is-loading");
+        document.body.classList.add("is-ready");
+        document.getElementById("loader").style.display = "none";
+
+        window.scrollTo(0, 0);
+        currentProgress = 0;
+        updateOverlays(0);
+        initScroll();
+        initReveals();
+      } catch (error) {
+        console.error(error);
+        loaderCount.textContent = "Load failed";
+        updateDebugInfo('Load failed: ' + (error && error.message ? error.message : String(error)));
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
